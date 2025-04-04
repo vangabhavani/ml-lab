@@ -1,0 +1,59 @@
+import numpy as np
+import pandas as pd
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.linear_model import LinearRegression
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.metrics import mean_squared_error
+
+# Step 1: Generate a simple synthetic dataset (classification for demonstration)
+X, y = make_classification(n_samples=1000, n_features=10, random_state=42)
+
+# Step 2: Create a DataFrame to simulate real-world dataset with possible duplicates
+df = pd.DataFrame(X, columns=[f'feature_{i}' for i in range(X.shape[1])])
+df['target'] = y
+
+# Introduce duplicates in the dataset for demonstration
+df = pd.concat([df, df.sample(200, random_state=42)], ignore_index=True)
+
+# Step 3: Remove duplicates
+df_clean = df.drop_duplicates()
+
+# Step 4: Split data into training and testing sets
+X_clean = df_clean.drop(columns='target')
+y_clean = df_clean['target']
+X_train, X_test, y_train, y_test = train_test_split(X_clean, y_clean, test_size=0.2, random_state=42)
+
+# Step 5: Implement Bias-Variance Tradeoff using Linear Regression and Decision Tree Regressor
+
+# Linear Regression model (high bias, low variance expected)
+lr_model = LinearRegression()
+
+# Decision Tree model (low bias, high variance expected)
+dt_model = DecisionTreeRegressor(random_state=42)
+
+# Perform cross-validation for both models
+lr_scores = cross_val_score(lr_model, X_train, y_train, cv=5, scoring='neg_mean_squared_error')
+dt_scores = cross_val_score(dt_model, X_train, y_train, cv=5, scoring='neg_mean_squared_error')
+
+# Bias-Variance tradeoff visualization through error scores (negative MSE)
+print("Linear Regression (High Bias, Low Variance):")
+print(f"Cross-Validation Scores (MSE): {lr_scores}")
+print(f"Mean Cross-Validation MSE: {-lr_scores.mean()}")
+
+print("\nDecision Tree (Low Bias, High Variance):")
+print(f"Cross-Validation Scores (MSE): {dt_scores}")
+print(f"Mean Cross-Validation MSE: {-dt_scores.mean()}")
+
+# Step 6: Train both models on the full training set and evaluate them
+lr_model.fit(X_train, y_train)
+y_pred_lr = lr_model.predict(X_test)
+mse_lr = mean_squared_error(y_test, y_pred_lr)
+
+dt_model.fit(X_train, y_train)
+y_pred_dt = dt_model.predict(X_test)
+mse_dt = mean_squared_error(y_test, y_pred_dt)
+
+print("\nPerformance on Test Set:")
+print(f"Linear Regression MSE: {mse_lr}")
+print(f"Decision Tree MSE: {mse_dt}")
