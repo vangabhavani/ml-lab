@@ -1,0 +1,51 @@
+ # Import necessary libraries
+import numpy as np
+from sklearn import datasets
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+
+# Step 1: Load the Iris dataset
+iris = datasets.load_iris()
+X = iris.data    # Features (sepal & petal length, width)
+y = iris.target  # Labels (0: setosa, 1: versicolor, 2: virginica)
+
+# Step 2: Split the dataset (80% training, 20% testing)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Step 3: Introduce noise (randomly modify some training labels)
+np.random.seed(42)  # For reproducibility
+num_noisy_labels = int(0.1 * len(y_train))  # Change 10% of the labels
+
+random_indices = np.random.choice(len(y_train), num_noisy_labels, replace=False)
+for i in random_indices:
+    original_label = y_train[i]
+    possible_labels = [label for label in [0, 1, 2] if label != original_label]
+    y_train[i] = np.random.choice(possible_labels)  # Assign a wrong label
+
+print(f"\nIntroduced noise: Modified {num_noisy_labels} labels in training data.")
+
+# Step 4: Create and train the k-NN model
+k = 5  # Number of neighbors
+knn = KNeighborsClassifier(n_neighbors=k)  # Using sklearn's built-in k-NN classifier
+knn.fit(X_train, y_train)
+
+# Step 5: Make predictions
+y_pred = knn.predict(X_test)
+
+# Step 6: Display correct and incorrect predictions
+correct = 0
+wrong = 0
+
+print("\n=== Prediction Results ===")
+for i in range(len(y_test)):
+    if y_test[i] == y_pred[i]:
+        correct += 1
+        print(f"✔ Correct: Predicted={iris.target_names[y_pred[i]]}, Actual={iris.target_names[y_test[i]]}")
+    else:
+        wrong += 1
+        print(f"✘ Wrong: Predicted={iris.target_names[y_pred[i]]}, Actual={iris.target_names[y_test[i]]}")
+
+# Step 7: Print accuracy
+accuracy = (correct / len(y_test)) * 100
+print(f"\nTotal Correct: {correct}, Total Wrong: {wrong}")
+print(f"Accuracy: {accuracy:.2f}%")
