@@ -1,0 +1,54 @@
+# Import necessary libraries
+import pandas as pd
+from sklearn.cluster import KMeans
+from sklearn.mixture import GaussianMixture
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import silhouette_score
+from sklearn.datasets import load_iris  # Using a dataset for demonstration (replace with your heart disease dataset)
+
+# Load heart disease dataset (replace this with actual heart disease dataset)
+# For demonstration, we'll use the UCI heart disease dataset or load your dataset if it's available in CSV.
+# heart_disease_data = pd.read_csv("heart_disease.csv")  # Replace with the actual dataset path
+
+# For this example, let's assume the dataset is already loaded as a pandas DataFrame.
+heart_disease_data = load_iris()  # Placeholder (replace with actual heart disease dataset)
+
+# Extracting features (replace with actual column names for the heart disease dataset)
+X = heart_disease_data.data
+
+# Data Preprocessing: Normalize/Standardize the data
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# 1. Apply K-Means Clustering
+kmeans = KMeans(n_clusters=3, random_state=42)  # You can adjust n_clusters
+kmeans_labels = kmeans.fit_predict(X_scaled)
+
+# Evaluate K-Means performance using Silhouette Score
+kmeans_silhouette = silhouette_score(X_scaled, kmeans_labels)
+print(f"K-Means Silhouette Score: {kmeans_silhouette:.3f}")
+
+# 2. Apply EM (Gaussian Mixture Model) Clustering
+gmm = GaussianMixture(n_components=3, random_state=42)  # Set n_components based on the number of clusters
+gmm_labels = gmm.fit_predict(X_scaled)
+
+# Evaluate GMM performance using Silhouette Score
+gmm_silhouette = silhouette_score(X_scaled, gmm_labels)
+print(f"GMM Silhouette Score: {gmm_silhouette:.3f}")
+
+# You can visualize the clusters if needed (optional)
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(12, 6))
+
+# Plot K-Means clusters
+plt.subplot(1, 2, 1)
+plt.scatter(X_scaled[:, 0], X_scaled[:, 1], c=kmeans_labels, cmap='viridis')
+plt.title('K-Means Clustering')
+
+# Plot GMM clusters
+plt.subplot(1, 2, 2)
+plt.scatter(X_scaled[:, 0], X_scaled[:, 1], c=gmm_labels, cmap='viridis')
+plt.title('Gaussian Mixture Model Clustering')
+
+plt.show()
