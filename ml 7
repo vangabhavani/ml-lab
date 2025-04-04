@@ -1,0 +1,68 @@
+import numpy as np
+
+# Step 1: Define the Sigmoid activation function and its derivative
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+def sigmoid_derivative(x):
+    return x * (1 - x)
+
+# Step 2: Define the Neural Network Class
+class NeuralNetwork:
+    def __init__(self, input_size, hidden_size, output_size):
+        # Initialize weights and biases with random values
+        np.random.seed(42)
+        self.weights_input_hidden = np.random.rand(input_size, hidden_size)  # Input to hidden layer
+        self.weights_hidden_output = np.random.rand(hidden_size, output_size)  # Hidden to output layer
+        self.bias_hidden = np.random.rand(1, hidden_size)  # Hidden layer bias
+        self.bias_output = np.random.rand(1, output_size)  # Output layer bias
+    
+    # Step 3: Forward Propagation
+    def forward(self, X):
+        self.hidden_input = np.dot(X, self.weights_input_hidden) + self.bias_hidden
+        self.hidden_output = sigmoid(self.hidden_input)
+        
+        self.output_input = np.dot(self.hidden_output, self.weights_hidden_output) + self.bias_output
+        self.output = sigmoid(self.output_input)
+        
+        return self.output
+    
+    # Step 4: Backpropagation
+    def backward(self, X, y, learning_rate=0.1):
+        output_error = y - self.output  # Error in output
+        output_delta = output_error * sigmoid_derivative(self.output)  # Gradient of output layer
+        
+        hidden_error = output_delta.dot(self.weights_hidden_output.T)  # Backpropagate to hidden layer
+        hidden_delta = hidden_error * sigmoid_derivative(self.hidden_output)  # Gradient of hidden layer
+        
+        # Update weights and biases using the gradients (backpropagation)
+        self.weights_input_hidden += X.T.dot(hidden_delta) * learning_rate
+        self.weights_hidden_output += self.hidden_output.T.dot(output_delta) * learning_rate
+        self.bias_hidden += np.sum(hidden_delta, axis=0, keepdims=True) * learning_rate
+        self.bias_output += np.sum(output_delta, axis=0, keepdims=True) * learning_rate
+    
+    # Step 5: Training the Network
+    def train(self, X, y, epochs=10000, learning_rate=0.1):
+        for epoch in range(epochs):
+            self.forward(X)
+            self.backward(X, y, learning_rate)
+            if epoch % 1000 == 0:
+                loss = np.mean(np.square(y - self.output))  # Mean squared error
+                print(f"Epoch {epoch}, Loss: {loss}")
+
+# Step 6: Define a dataset (XOR problem)
+# Inputs (X) and outputs (y) for the XOR function
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+y = np.array([[0], [1], [1], [0]])
+
+# Step 7: Initialize and train the neural network
+input_size = 2  # 2 input features (for XOR)
+hidden_size = 4  # Number of neurons in the hidden layer
+output_size = 1  # 1 output (XOR result)
+
+nn = NeuralNetwork(input_size, hidden_size, output_size)
+nn.train(X, y, epochs=10000, learning_rate=0.1)
+
+# Step 8: Test the trained network
+print("\nTesting trained network:")
+print(nn.forward(X))  # Output should be close to [0, 1, 1, 0]
