@@ -1,0 +1,105 @@
+import math
+
+# Helper function to calculate entropy
+def entropy(data):
+    total = len(data)
+    labels = {}
+    for instance in data:
+        label = instance[-1]  # Last element is the class label
+        if label not in labels:
+            labels[label] = 0
+        labels[label] += 1
+    entropy_value = 0
+    for label in labels.values():
+        probability = label / total
+        entropy_value -= probability * math.log2(probability)
+    return entropy_value
+
+# Helper function to calculate the information gain
+def information_gain(data, attribute_index):
+    total_entropy = entropy(data)
+    attribute_values = {}
+    
+    # Group data by attribute values
+    for instance in data:
+        value = instance[attribute_index]
+        if value not in attribute_values:
+            attribute_values[value] = []
+        attribute_values[value].append(instance)
+    
+    weighted_entropy = 0
+    for value, subset in attribute_values.items():
+        weight = len(subset) / len(data)
+        weighted_entropy += weight * entropy(subset)
+    
+    return total_entropy - weighted_entropy
+
+# Function to find the best attribute for splitting
+def best_attribute(data, attributes):
+    best_gain = -1
+    best_attr_index = -1
+    for i in range(len(attributes)):
+        gain = information_gain(data, i)
+        if gain > best_gain:
+            best_gain = gain
+            best_attr_index = i
+    return best_attr_index
+
+# ID3 algorithm to build the decision tree
+def id3(data, attributes, class_labels):
+    # If all instances have the same class, return a leaf node
+    labels = [instance[-1] for instance in data]
+    if len(set(labels)) == 1:
+        return labels[0]
+    
+    # If no attributes left, return the most common class label
+    if not attributes:
+        return max(set(labels), key=labels.count)
+    
+    # Find the best attribute to split on
+    best_attr_index = best_attribute(data, attributes)
+    best_attr = attributes[best_attr_index]
+    
+    # Create a decision node
+    tree = {best_attr: {}}
+    
+    # Remove the chosen attribute from the list of available attributes
+    new_attributes = attributes[:best_attr_index] + attributes[best_attr_index+1:]
+    
+    # Group data by the values of the best attribute
+    attribute_values = {}
+    for instance in data:
+        value = instance[best_attr_index]
+        if value not in attribute_values:
+            attribute_values[value] = []
+        attribute_values[value].append(instance)
+    
+    # Recursively create subtrees
+    for value, subset in attribute_values.items():
+        tree[best_attr][value] = id3(subset, new_attributes, class_labels)
+    
+    return tree
+
+# Example usage
+if __name__ == "__main__":
+    # Example dataset (last column is the class label)
+    data = [
+        [1, 1, 'Yes'],
+        [1, 2, 'No'],
+        [2, 1, 'Yes'],
+        [2, 2, 'No'],
+        [3, 1, 'Yes'],
+        [3, 2, 'No']
+    ]
+    
+    # Attribute names (excluding the class label)
+    attributes = ['Outlook', 'Temperature']
+    
+    # Class labels
+    class_labels = ['Yes', 'No']
+    
+    # Build the decision tree
+    tree = id3(data, attributes, class_labels)
+    
+    print("Decision Tree:")
+    print(tree)
