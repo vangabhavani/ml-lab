@@ -1,0 +1,39 @@
+# Import necessary libraries
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report
+
+# Step 1: Create a new sample dataset
+# For demonstration, we'll create a DataFrame with random data
+data = pd.DataFrame({
+    'Age': [22, 25, 47, 35, 46, 56, 23, 34, 45, 36, 29, 40, 50, 60, 30],
+    'AccountBalance': [1500, 1800, 3200, 2900, 4000, 6000, 2000, 2500, 3500, 4500, 3000, 5000, 7000, 8000, 5500],
+    'NumTransactions': [5, 6, 2, 8, 3, 1, 4, 7, 9, 2, 1, 6, 3, 2, 10],
+    'Churned': [0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1]  # Target variable (0 = Not Churned, 1 = Churned)
+})
+
+# Step 2: Preprocess the data
+# Assume the target variable is in the last column
+X = data.iloc[:, :-1]  # Features (all columns except the last one)
+y = data.iloc[:, -1]   # Target (last column)
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Step 3: Train the Binary Classifier (Random Forest)
+model = RandomForestClassifier(random_state=42)
+model.fit(X_train, y_train)
+
+# Step 4: Evaluate the model
+y_pred = model.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Accuracy: {accuracy}")
+print(classification_report(y_test, y_pred))
+
+# Step 5: Make predictions
+# Replace feature1, feature2, ... with actual feature values
+new_data = np.array([[32, 4500, 5]])  # Example: Age=32, AccountBalance=4500, NumTransactions=5
+prediction = model.predict(new_data)
+print(f"Prediction: {prediction[0]}")  # Output the predicted class
