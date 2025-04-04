@@ -1,0 +1,34 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.linalg import inv
+
+# Step 1: Locally Weighted Linear Regression (LWLR)
+def locally_weighted_regression(X, y, tau=1.0):
+    """
+    Perform locally weighted linear regression to fit a model to the data.
+
+    Parameters:
+        X (numpy.ndarray): Input data, shape (m, n).
+        y (numpy.ndarray): Target values, shape (m, 1).
+        tau (float): The width of the Gaussian kernel.
+    
+    Returns:
+        numpy.ndarray: The estimated weights for the regression.
+    """
+    m, n = X.shape
+    weights = np.zeros((m, m))  # Initialize the weight matrix
+
+    # Step 2: Compute the weight matrix based on the Gaussian kernel
+    for i in range(m):
+        diff = X - X[i]
+        # Fix: Use item() to get the scalar value from the 1D array
+        weights[i, i] = np.exp(-np.sum(diff**2) / (2 * tau**2)).item()
+    
+    # Step 3: Compute theta using the weighted least squares solution
+    X_T = np.column_stack((np.ones(m), X))  # Add a bias term to the input data
+    W = np.dot(X_T.T, np.dot(weights, X_T))  # Weighted X^T * X
+    theta = np.dot(inv(W), np.dot(X_T.T, np.dot(weights, y)))  # Final weights (theta)
+
+    return theta
+
+# ... (rest of the code remains the same)
