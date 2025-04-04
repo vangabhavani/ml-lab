@@ -1,0 +1,73 @@
+def candidate_elimination_algorithm(examples, attributes, target):
+    # Initialize S (the most specific hypothesis) and G (the most general hypothesis)
+    S = ['?' * len(attributes)]  # The most specific hypothesis (All features are '?' initially)
+    G = [['?' * len(attributes)]]  # The most general hypothesis (All features are '?' initially)
+    
+    # Iterate through each training example
+    for example in examples:
+        # If the target value of the example is positive (+), we modify S and G
+        if example[-1] == target:
+            S = [generalize_specific(hypothesis, example, attributes) for hypothesis in S]
+        # If the target value of the example is negative (-), we modify G and S
+        else:
+            G = [specialize_general(hypothesis, example, attributes) for hypothesis in G]
+
+    return S, G
+
+
+def generalize_specific(hypothesis, example, attributes):
+    new_hypothesis = ''
+    for h, e in zip(hypothesis, example[:-1]):  # Ignore the target attribute
+        if h == '?':
+            new_hypothesis += e
+        else:
+            new_hypothesis += '?' if e != h else h
+    return new_hypothesis
+
+
+def specialize_general(hypothesis, example, attributes):
+    new_hypothesis = []
+    for h, e in zip(hypothesis, example[:-1]):  # Ignore the target attribute
+        if h == '?':
+            new_hypothesis.append(e)
+        else:
+            new_hypothesis.append('?')
+    return new_hypothesis
+
+
+# Example usage of the Candidate Elimination Algorithm
+if __name__ == "__main__":
+    # Dataset: [Outlook, Temperature, Humidity, Wind, PlayTennis (Target)]
+    examples = [
+        ['Sunny', 'Hot', 'High', 'Weak', 'No'],
+        ['Sunny', 'Hot', 'High', 'Strong', 'No'],
+        ['Overcast', 'Hot', 'High', 'Weak', 'Yes'],
+        ['Rain', 'Mild', 'High', 'Weak', 'Yes'],
+        ['Rain', 'Cool', 'Normal', 'Weak', 'Yes'],
+        ['Rain', 'Cool', 'Normal', 'Strong', 'No'],
+        ['Overcast', 'Cool', 'Normal', 'Strong', 'Yes'],
+        ['Sunny', 'Mild', 'High', 'Weak', 'No'],
+        ['Sunny', 'Cool', 'Normal', 'Weak', 'Yes'],
+        ['Rain', 'Mild', 'Normal', 'Weak', 'Yes'],
+        ['Sunny', 'Mild', 'Normal', 'Strong', 'Yes'],
+        ['Overcast', 'Mild', 'High', 'Strong', 'Yes'],
+        ['Overcast', 'Hot', 'Normal', 'Weak', 'Yes'],
+        ['Rain', 'Mild', 'High', 'Strong', 'No']
+    ]
+    
+    # Attributes (excluding the target attribute "PlayTennis")
+    attributes = ['Outlook', 'Temperature', 'Humidity', 'Wind']
+    
+    # Target class is "PlayTennis" (positive for "Yes" and negative for "No")
+    target = 'Yes'
+    
+    # Run the Candidate Elimination algorithm
+    S, G = candidate_elimination_algorithm(examples, attributes, target)
+    
+    print("Most Specific Hypothesis (S):")
+    for hypothesis in S:
+        print(hypothesis)
+
+    print("\nMost General Hypothesis (G):")
+    for hypothesis in G:
+        print(hypothesis)
