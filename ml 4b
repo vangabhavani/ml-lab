@@ -1,0 +1,40 @@
+# Import necessary libraries
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
+
+# Step 1: Create a sample dataset
+# For demonstration, we'll create a DataFrame with random data
+data = pd.DataFrame({
+    'Age': [22, 25, 47, 35, 46, 56, 23, 34, 45, 36, 29, 40, 50, 60, 30],
+    'Income': [15000, 18000, 32000, 29000, 40000, 60000, 20000, 25000, 35000, 45000, 30000, 50000, 70000, 80000, 55000],
+    'SpendingScore': [39, 81, 6, 77, 40, 60, 50, 70, 90, 30, 20, 80, 10, 5, 95],
+    'Purchased': [0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1]  # Target variable
+})
+
+# Step 2: Preprocess the data
+# Assume the target variable is in the last column
+X = data.iloc[:, :-1]  # Features (all columns except the last one)
+y = data.iloc[:, -1]   # Target (last column)
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Step 3: Train the Logistic Regression model
+model = LogisticRegression()
+model.fit(X_train, y_train)
+
+# Step 4: Evaluate the model
+y_pred = model.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Accuracy: {accuracy}")
+print(classification_report(y_test, y_pred))
+
+# Step 5: Make predictions
+# Replace feature1, feature2, ... with actual feature values
+new_data = np.array([[30, 40000, 70]])  # Example: Age=30, Income=40000, SpendingScore=70
+prediction = model.predict(new_data)
+print(f"Prediction: {prediction[0]}")  # Output the predicted class
+
